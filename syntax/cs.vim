@@ -44,6 +44,7 @@ syn keyword csUnsupportedStatement	add remove value
 syn keyword csUnspecifiedKeyword	explicit implicit
 
 syn keyword csTypeOf                    typeof nextgroup=csEnclosed
+syn keyword csNameOf                    nameof nextgroup=csEnclosed
 
 " Linq Keywords
 syn keyword csLinq                      from where select group into orderby join let in on equals by ascending descending
@@ -65,11 +66,11 @@ syn keyword csNewDecleration            new nextgroup=csClass skipwhite
 syn match csClass contained       /\<[A-Z][a-z]\w\+/ nextgroup=csGeneric
 syn match csIface contained       /\<I[A-Z][a-z]\w\+/ nextgroup=csGeneric
 " syn region csGeneric start="<" end=">" contains=csIface,csClass
-syn region csEnclosed start="(" end=")" contains=csConstant,csType,csString, csVerbatimString, csCharacter, csNumber,csIface,csClass,csNewDecleration,csUnspecifiedStatement,csLinq
+syn region csEnclosed start="(" end=")" contains=csConstant,csType,csString, csVerbatimString, csInterpString,csInterpVerbatimString, csCharacter, csNumber,csIface,csClass,csNewDecleration,csUnspecifiedStatement,csLinq
 "syn region csInherits start=":" end="{" contains=csIface,csClass
 
 " Attributes
-syn region csAttribute start="^\s*\[" end="\]\s*" contains=csString, csVerbatimString, csCharacter, csNumber, csType
+syn region csAttribute start="^\s*\[" end="\]\s*" contains=csString, csVerbatimString, csInterpString, csInterpVerbatimString, csCharacter, csNumber, csType
 
 
 " Comments
@@ -112,6 +113,14 @@ syn region	csPreCondit
 syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
 
+" [1] ??? Variable interpolation
+" FIXME this is from perl.vim and not official ECMA
+"
+" These items are interpolated inside $"" strings and similar constructs.
+syn region csInterp	contained start=+{+ end=+}+ contains=csInterpStart,csInterpEnd,csConstant,csType,csString,csVerbatimString,csInterpString,csInterpVerbatimString, csCharacter, csNumber,csIface,csClass,csUnspecifiedStatement
+" TODO can't get closing bracket to highlight w/o breaking things
+"syn match csInterpStart +{+ contained
+"syn match csInterpEnd +}+ contained
 
 
 " Strings and constants
@@ -122,6 +131,10 @@ syn match   csSpecialChar	contained +\\["\\'0abfnrtvx]+
 " unicode characters
 syn match   csUnicodeNumber	+\\\(u\x\{4}\|U\x\{8}\)+ contained contains=csUnicodeSpecifier
 syn match   csUnicodeSpecifier	+\\[uU]+ contained
+syn region  csInterpVerbatimString	start=+\$@"+ end=+"+ skip=+""+ contains=csInterpVerbatimSpec,csInterp,@Spell
+syn match   csInterpVerbatimSpec        +\$@"+he=s+2 contained
+syn region  csInterpString	        start=+\$"+ end=+"+ end=+$+ contains=csInterpSpec,csSpecialChar,csSpecialError,csUnicodeNumber,csInterp,@Spell
+syn match   csInterpSpec                +\$"+he=s+1 contained
 syn region  csVerbatimString	start=+@"+ end=+"+ skip=+""+ contains=csVerbatimSpec,@Spell
 syn match   csVerbatimSpec	+@"+he=s+1 contained
 syn region  csString		start=+"+  end=+"+ end=+$+ contains=csSpecialChar,csSpecialError,csUnicodeNumber,@Spell
@@ -161,6 +174,12 @@ hi def link csSpecialCharError		Error
 hi def link csString			String
 hi def link csVerbatimString		String
 hi def link csVerbatimSpec		SpecialChar
+hi def link csInterpString		String
+hi def link csInterpSpec		SpecialChar
+hi def link csInterpVerbatimString	String
+hi def link csInterpVerbatimSpec	SpecialChar
+"hi def link csInterpStart		SpecialChar
+"hi def link csInterpEnd			SpecialChar
 hi def link csPreCondit			PreCondit
 hi def link csCharacter			Character
 hi def link csSpecialChar		SpecialChar
@@ -168,6 +187,7 @@ hi def link csNumber			Number
 hi def link csUnicodeNumber		SpecialChar
 hi def link csUnicodeSpecifier		SpecialChar
 hi def link csTypeOf                    Keyword
+hi def link csNameOf                    Keyword
 
 " xml markup
 hi def link csXmlCommentLeader		Comment
@@ -179,4 +199,4 @@ let b:current_syntax = "cs"
 let &cpo = s:cs_cpo_save
 unlet s:cs_cpo_save
 
-" vim: ts=8
+" vim: ts=8 noexpandtab
